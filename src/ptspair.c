@@ -26,7 +26,8 @@ static void clean_pts(struct pts *pts)
 	if (pts == NULL)
 		return;
 
-	close(pts->master);
+	if (pts->master != 0)
+		close(pts->master);
 	memset(pts, 0, sizeof(*pts));
 }
 
@@ -64,38 +65,47 @@ err:
 	return ret;
 }
 
-int init_pts_pair(struct pts_pair *pts_pair)
+int ptspair_init(struct ptspair *ptspair)
 {
 	int ret;
 
-	if (pts_pair == NULL)
+	if (ptspair == NULL)
 		return -EINVAL;
 
-	pts_pair->epollfd = epoll_create1(EPOLL_CLOEXEC);
-	if (pts_pair->epollfd == -1)
+	ptspair->epollfd = epoll_create1(EPOLL_CLOEXEC);
+	if (ptspair->epollfd == -1)
 		return -errno;
 
-	ret = init_pts(pts_pair->pts);
+	ret = init_pts(ptspair->pts);
 	if (ret < 0)
 		goto err;
-	ret = init_pts(pts_pair->pts + 1);
+	ret = init_pts(ptspair->pts + 1);
 	if (ret < 0)
 		goto err;
 
 	return 0;
 err:
-	clean_pts_pair(pts_pair);
+	ptspair_clean(ptspair);
 
 	return ret;
 }
 
-void clean_pts_pair(struct pts_pair *pts_pair)
+int ptspair_get_fd(struct ptspair *ptspair)
 {
-	if (pts_pair == NULL)
+	if (ptspair == NULL)
+		return -EINVAL;
+
+	return ptspair->epollfd;
+}
+
+void ptspair_clean(struct ptspair *ptspair)
+{
+	if (ptspair == NULL)
 		return;
 
-	close(pts_pair->epollfd);
-	clean_pts(pts_pair->pts + 1);
-	clean_pts(pts_pair->pts);
-	memset(pts_pair, 0, sizeof(*pts_pair));
+	if (ptspair->epollfd != 0)
+		close(ptspair->epollfd);
+	clean_pts(ptspair->pts + 1);
+	clean_pts(ptspair->pts);
+	memset(ptspair, 0, sizeof(*ptspair));
 }

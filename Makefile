@@ -6,16 +6,16 @@ export CPPFLAGS ?= \
 	-I$(BASE_SRC_DIR)/include/
 export LDFLAGS  ?=
 
-bin := pts_pair
-lib := libpts_pair.so
+bin := ptspair
+lib := libptspair.so
 
-libpts_pair_src := \
+libptspair_src := \
 	src/ptspair.c
 
-libpts_pair_objects := $(libpts_pair_src:.c=.o)
+libptspair_objects := $(libptspair_src:.c=.o)
 
-libpts_pair_clean_files := \
-	$(libpts_pair_objects) \
+libptspair_clean_files := \
+	$(libptspair_objects) \
 	$(lib) \
 	main.o \
 	$(bin)
@@ -25,8 +25,8 @@ all: $(bin)
 $(bin): example/main.c $(lib)
 	$(CC) $^ -o $@ $(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
 
-$(lib): $(libpts_pair_objects)
+$(lib): $(libptspair_objects)
 	$(CC) -shared $^ -o $@ $(LDFLAGS)
 
 clean:
-	$(Q) -rm -f $(libpts_pair_clean_files) &>/dev/null
+	$(Q) -rm -f $(libptspair_clean_files) &>/dev/null

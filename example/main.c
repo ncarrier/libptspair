@@ -14,13 +14,13 @@
 int main(void)
 {
 	int ret;
-	struct pts_pair pair;
+	struct ptspair pair;
 
-	ret = init_pts_pair(&pair);
+	ret = ptspair_init(&pair);
 	if (ret < 0)
 		error(EXIT_FAILURE, -ret, "init_pts_pair");
 
-	clean_pts_pair(&pair);
+	ptspair_clean(&pair);
 
 	return EXIT_SUCCESS;
 }

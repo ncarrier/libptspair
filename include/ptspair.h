@@ -25,12 +25,13 @@ struct pts {
 	int master;
 };
 
-struct pts_pair {
+struct ptspair {
 	struct pts pts[2];
 	int epollfd;
 };
 
-int init_pts_pair(struct pts_pair *pts_pair);
-void clean_pts_pair(struct pts_pair *pts_pair);
+int ptspair_init(struct ptspair *ptspair);
+int ptspair_get_fd(struct ptspair *ptspair);
+void ptspair_clean(struct ptspair *ptspair);
 
 #endif /* PTSPAIR_H_ */
