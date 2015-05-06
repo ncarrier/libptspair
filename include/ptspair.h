@@ -12,6 +12,11 @@
 
 #define BUFFER_SIZE 0x200
 
+enum pts_index {
+	PTSPAIR_FOO,
+	PTSPAIR_BAR,
+};
+
 struct buffer {
 	char buf[BUFFER_SIZE];
 	int start;
@@ -21,6 +26,7 @@ struct buffer {
 
 struct pts {
 	char slave_path[PATH_MAX];
+	/* stores the data read from this pts */
 	struct buffer buf;
 	int master;
 };
@@ -31,7 +37,9 @@ struct ptspair {
 };
 
 int ptspair_init(struct ptspair *ptspair);
+const char *ptspair_get_path(struct ptspair *ptspair, enum pts_index pts_index);
 int ptspair_get_fd(struct ptspair *ptspair);
+int ptspair_process_events(struct ptspair *ptspair);
 void ptspair_clean(struct ptspair *ptspair);
 
 #endif /* PTSPAIR_H_ */
