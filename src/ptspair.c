@@ -52,7 +52,7 @@ static int init_pts(struct pts *pts)
 		goto err;
 	}
 	ret = ptsname_r(pts->master, pts->slave_path, PATH_MAX);
-	/* TODO how to check for truncature ? */
+	/* a buffer which is too short sets errno to ERANGE */
 	if (ret < 0) {
 		ret = -errno;
 		goto err;
@@ -65,40 +65,32 @@ err:
 	return ret;
 }
 
-static int register_pts_read(struct ptspair *ptspair, struct pts *pts)
+static int pts_epoll_ctl(struct ptspair *ptspair, struct pts *pts, int op,
+		int evts)
 {
 	struct epoll_event event = {
-			.events = EPOLLIN,
+			.events = evts,
 			.data = {
 					.ptr = pts,
 			},
 	};
 
-	return epoll_ctl(ptspair->epollfd, EPOLL_CTL_ADD, pts->master, &event);
+	return epoll_ctl(ptspair->epollfd, op, pts->master, &event);
+}
+
+static int register_pts_read(struct ptspair *ptspair, struct pts *pts)
+{
+	return pts_epoll_ctl(ptspair, pts, EPOLL_CTL_ADD, EPOLLIN);
 }
 
 static int register_pts_write(struct ptspair *ptspair, struct pts *pts)
 {
-	struct epoll_event event = {
-			.events = EPOLLIN | EPOLLOUT,
-			.data = {
-					.ptr = pts,
-			},
-	};
-
-	return epoll_ctl(ptspair->epollfd, EPOLL_CTL_MOD, pts->master, &event);
+	return pts_epoll_ctl(ptspair, pts, EPOLL_CTL_MOD, EPOLLIN | EPOLLOUT);
 }
 
 static int unregister_pts_write(struct ptspair *ptspair, struct pts *pts)
 {
-	struct epoll_event event = {
-			.events = EPOLLIN,
-			.data = {
-					.ptr = pts,
-			},
-	};
-
-	return epoll_ctl(ptspair->epollfd, EPOLL_CTL_MOD, pts->master, &event);
+	return pts_epoll_ctl(ptspair, pts, EPOLL_CTL_MOD, EPOLLIN);
 }
 
 int ptspair_init(struct ptspair *ptspair)
@@ -135,7 +127,7 @@ err:
 
 static char *write_start(struct buffer *buf)
 {
-	if (buf->end == BUFFER_SIZE)
+	if (buf->end == PTSPAIR_BUFFER_SIZE)
 		return buf->buf;
 
 	return buf->buf + buf->end;
@@ -143,23 +135,25 @@ static char *write_start(struct buffer *buf)
 
 static int write_length(struct buffer *buf)
 {
-	if (buf->end == BUFFER_SIZE)
-		return BUFFER_SIZE - buf->start;
+	if (buf->end == PTSPAIR_BUFFER_SIZE)
+		return PTSPAIR_BUFFER_SIZE - buf->start;
 	if (buf->end < buf->start)
 		return buf->start - buf->end;
 
-	return BUFFER_SIZE - buf->start;
+	return PTSPAIR_BUFFER_SIZE - buf->start;
 }
 
 static void written_update(struct buffer *buf, int written)
 {
 	buf->end += written;
-	buf->end %= BUFFER_SIZE;
+	buf->end %= PTSPAIR_BUFFER_SIZE;
+	if (buf->end == buf->start)
+		buf->full = true;
 }
 
 static char *read_start(struct buffer *buf)
 {
-	if (buf->start == BUFFER_SIZE)
+	if (buf->start == PTSPAIR_BUFFER_SIZE)
 		return buf->buf;
 
 	return buf->buf + buf->start;
@@ -167,37 +161,48 @@ static char *read_start(struct buffer *buf)
 static int read_length(struct buffer *buf)
 {
 	if (buf->end < buf->start)
-		return BUFFER_SIZE - buf->start;
+		return PTSPAIR_BUFFER_SIZE - buf->start;
 	if (buf->end == buf->start)
-		return buf->full ? BUFFER_SIZE : 0;
+		return buf->full ? PTSPAIR_BUFFER_SIZE : 0;
 
 	return buf->end - buf->start;
 }
 
 static void read_update(struct buffer *buf, int read)
 {
+	if (buf->end == buf->start)
+		buf->full = false;
 	buf->start += read;
-	buf->start %= BUFFER_SIZE;
+	buf->start %= PTSPAIR_BUFFER_SIZE;
 }
 
-static int process_in_event(struct ptspair *ptspair, struct pts *e,
-		struct pts *other_pts)
+static struct pts *get_other_pts(struct ptspair *ptspair, struct pts *pts)
+{
+	if (pts->master == ptspair->pts[PTSPAIR_FOO].master)
+		return ptspair->pts + PTSPAIR_BAR;
+	else
+		return ptspair->pts + PTSPAIR_FOO;
+}
+
+static int process_in_event(struct ptspair *ptspair, struct pts *pts)
 {
 	ssize_t sret;
 	char *start;
 	int len;
 	bool is_registered;
-	struct buffer *buf = &other_pts->buf;
+	struct pts *other_pts;
+	struct buffer *buf;
 
+	other_pts = get_other_pts(ptspair, pts);
+	buf = &other_pts->buf;
 	start = write_start(buf);
 	len = write_length(buf);
 	if (len == 0)
 		return -ENOBUFS;
 	is_registered = read_length(buf) != 0;
-	sret = read(e->master, start, len);
+	sret = read(pts->master, start, len);
 	if (sret < 0)
 		return -errno;
-	// TODO handle EOF
 	written_update(buf, sret);
 	if (is_registered)
 		return 0;
@@ -205,23 +210,21 @@ static int process_in_event(struct ptspair *ptspair, struct pts *e,
 	return register_pts_write(ptspair, other_pts);
 }
 
-static int process_out_event(struct ptspair *ptspair,
-		struct pts *e, struct pts *other_pts)
+static int process_out_event(struct ptspair *ptspair, struct pts *pts)
 {
 	ssize_t sret;
 	char *start;
 	int len;
-	struct buffer *buf = &e->buf;
+	struct buffer *buf = &pts->buf;
 
 	start = read_start(buf);
 	len = read_length(buf);
-	sret = write(e->master, start, len);
+	sret = write(pts->master, start, len);
 	if (sret < 0)
 		return -errno;
-	// TODO handle EOF
 	read_update(buf, sret);
 	if (read_length(buf) == 0)
-		return unregister_pts_write(ptspair, e);
+		return unregister_pts_write(ptspair, pts);
 
 	return 0;
 }
@@ -254,24 +257,18 @@ static int process_events(struct ptspair *ptspair, struct epoll_event *events,
 	int ret;
 	struct epoll_event *e;
 	struct pts *evt_src_pts;
-	struct pts *other_pts;
 	int error = 0;
 
 	while (events_nb--) {
 		e = events + events_nb;
 		evt_src_pts = e->data.ptr;
-		if (evt_src_pts->master == ptspair->pts[PTSPAIR_FOO].master)
-			other_pts = ptspair->pts + PTSPAIR_BAR;
-		else
-			other_pts = ptspair->pts + PTSPAIR_FOO;
 		if (e->events & EPOLLIN) {
-			ret = process_in_event(ptspair, evt_src_pts, other_pts);
+			ret = process_in_event(ptspair, evt_src_pts);
 			if (ret < 0)
 				error = ret;
 		}
 		if (e->events & EPOLLOUT) {
-			ret = process_out_event(ptspair, evt_src_pts,
-					other_pts);
+			ret = process_out_event(ptspair, evt_src_pts);
 			if (ret < 0)
 				error = ret;
 		}

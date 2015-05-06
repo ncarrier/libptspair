@@ -10,15 +10,16 @@
 #include <limits.h>
 #include <stdbool.h>
 
-#define BUFFER_SIZE 0x200
+#define PTSPAIR_BUFFER_SIZE 0x200
 
 enum pts_index {
 	PTSPAIR_FOO,
 	PTSPAIR_BAR,
 };
 
+/* circular buffer */
 struct buffer {
-	char buf[BUFFER_SIZE];
+	char buf[PTSPAIR_BUFFER_SIZE];
 	int start;
 	int end;
 	bool full;
@@ -26,7 +27,10 @@ struct buffer {
 
 struct pts {
 	char slave_path[PATH_MAX];
-	/* stores the data read from this pts */
+	/*
+	 * stores the data read from the other pts, ready to be written to the
+	 * other
+	 */
 	struct buffer buf;
 	int master;
 };
