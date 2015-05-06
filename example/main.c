@@ -8,6 +8,7 @@
 #include <sys/epoll.h>
 
 #include <unistd.h>
+#include <signal.h>
 
 #include <error.h>
 
@@ -17,6 +18,13 @@
 #include <string.h>
 
 #include <ptspair.h>
+
+static volatile int loop = 1;
+
+static void sigint_handler(__attribute__((unused))int sig)
+{
+	loop = 0;
+}
 
 int main(void)
 {
@@ -43,22 +51,18 @@ int main(void)
 	printf("foo pts: %s\n", ptspair_get_path(&pair, PTSPAIR_FOO));
 	printf("bar pts: %s\n", ptspair_get_path(&pair, PTSPAIR_BAR));
 
+	signal(SIGINT, sigint_handler);
 	do {
 		ret = epoll_wait(efd, &e, 1, -1);
-		if (ret < 0) {
-			if (errno == -EINTR) {
-				printf("interrupted\n");
-				break;
-			}
+		if (ret < 0 && errno != EINTR)
 			error(EXIT_FAILURE, errno, "epoll_wait");
-		}
 		if (ret == 1) {
 			ret = ptspair_process_events(&pair);
-			if (ret < 0)
+			if (ret < 0 && ret != -EINTR)
 				error(EXIT_FAILURE, -ret,
 						"ptspair_process_events");
 		}
-	} while (1);
+	} while (loop);
 
 	close(efd);
 	ptspair_clean(&pair);
