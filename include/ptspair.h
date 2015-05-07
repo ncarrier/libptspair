@@ -1,6 +1,13 @@
 /**
  * @file ptspair.h
- * @brief 
+ * @brief creates a pair of connected pts.
+ *
+ * Structures must be considered as opaque and must be manipulated through API
+ * functions only.<br />
+ *
+ * Negative values from functions returning an int indicate an error and are the
+ * opposite of an errno value. Functions returning a pointer indicate an error
+ * by returning NULL an setting errno.
  *
  * @date 5 mai 2015
  * @author carrier.nicolas0@gmail.com
@@ -10,11 +17,15 @@
 #include <limits.h>
 #include <stdbool.h>
 
+#ifndef PTSPAIR_BUFFER_SIZE
 #define PTSPAIR_BUFFER_SIZE 0x200
+#endif /* PTSPAIR_BUFFER_SIZE */
 
 enum pts_index {
 	PTSPAIR_FOO,
 	PTSPAIR_BAR,
+
+	PTSPAIR_NB,
 };
 
 /* circular buffer */
@@ -28,15 +39,15 @@ struct buffer {
 struct pts {
 	char slave_path[PATH_MAX];
 	/*
-	 * stores the data read from the other pts, ready to be written to the
-	 * other
+	 * stores the data read from the other pts, ready to be written to this
+	 * pts
 	 */
 	struct buffer buf;
 	int master;
 };
 
 struct ptspair {
-	struct pts pts[2];
+	struct pts pts[PTSPAIR_NB];
 	int epollfd;
 };
 

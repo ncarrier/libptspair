@@ -16,14 +16,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include <ptspair.h>
 
-static volatile int loop = 1;
+static volatile bool loop = true;
 
 static void sigint_handler(__attribute__((unused))int sig)
 {
-	loop = 0;
+	loop = false;
 }
 
 int main(void)

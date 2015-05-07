@@ -143,9 +143,9 @@ static int write_length(struct buffer *buf)
 	return PTSPAIR_BUFFER_SIZE - buf->start;
 }
 
-static void written_update(struct buffer *buf, int written)
+static void written_update(struct buffer *buf, int added)
 {
-	buf->end += written;
+	buf->end += added;
 	buf->end %= PTSPAIR_BUFFER_SIZE;
 	if (buf->end == buf->start)
 		buf->full = true;
@@ -168,11 +168,11 @@ static int read_length(struct buffer *buf)
 	return buf->end - buf->start;
 }
 
-static void read_update(struct buffer *buf, int read)
+static void read_update(struct buffer *buf, int consumed)
 {
 	if (buf->end == buf->start)
 		buf->full = false;
-	buf->start += read;
+	buf->start += consumed;
 	buf->start %= PTSPAIR_BUFFER_SIZE;
 }
 
@@ -237,9 +237,9 @@ const char *ptspair_get_path(struct ptspair *ptspair, enum pts_index index)
 	case PTSPAIR_FOO:
 	case PTSPAIR_BAR:
 		return ptspair->pts[index].slave_path;
+	default:
+		return NULL;
 	}
-
-	return NULL;
 }
 
 int ptspair_get_fd(struct ptspair *ptspair)
