@@ -28,5 +28,9 @@ $(bin): example/main.c $(lib)
 $(lib): $(libptspair_objects)
 	$(CC) -shared $^ -o $@ $(LDFLAGS)
 
+check: all
+	$(BASE_SRC_DIR)/tests/libptspair-test.lua $(shell realpath $(lib)) \
+		$(BASE_SRC_DIR)/include/ptspair.h
+
 clean:
 	$(Q) -rm -f $(libptspair_clean_files) &>/dev/null
