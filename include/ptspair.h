@@ -21,6 +21,10 @@
 #define PTSPAIR_BUFFER_SIZE 0x200
 #endif /* PTSPAIR_BUFFER_SIZE */
 
+#ifndef PTSPAIR_PATH_MAX
+#define PTSPAIR_PATH_MAX 0x1000
+#endif /* PTSPAIR_PATH_MAX */
+
 enum pts_index {
 	PTSPAIR_FOO,
 	PTSPAIR_BAR,
@@ -37,7 +41,7 @@ struct buffer {
 };
 
 struct pts {
-	char slave_path[PATH_MAX];
+	char slave_path[PTSPAIR_PATH_MAX];
 	/*
 	 * stores the data read from the other pts, ready to be written to this
 	 * pts

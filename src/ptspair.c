@@ -51,7 +51,7 @@ static int init_pts(struct pts *pts)
 		ret = -errno;
 		goto err;
 	}
-	ret = ptsname_r(pts->master, pts->slave_path, PATH_MAX);
+	ret = ptsname_r(pts->master, pts->slave_path, PTSPAIR_PATH_MAX);
 	/* a buffer which is too short sets errno to ERANGE */
 	if (ret < 0) {
 		ret = -errno;
