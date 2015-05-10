@@ -22,7 +22,7 @@ libptspair_clean_files := \
 
 all: $(bin)
 
-$(bin): example/main.c $(lib)
+$(bin): example/main.o $(lib)
 	$(CC) $^ -o $@ $(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
 
 $(lib): $(libptspair_objects)
