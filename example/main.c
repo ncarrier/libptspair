@@ -51,6 +51,7 @@ int main(void)
 
 	printf("foo pts: %s\n", ptspair_get_path(&pair, PTSPAIR_FOO));
 	printf("bar pts: %s\n", ptspair_get_path(&pair, PTSPAIR_BAR));
+	fflush(stdout);
 
 	signal(SIGINT, sigint_handler);
 	do {
