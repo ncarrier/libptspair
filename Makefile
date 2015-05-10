@@ -1,6 +1,6 @@
 VPATH := $(BASE_SRC_DIR)
 export CC       ?= gcc
-export CFLAGS   ?= -O0 -g -Wall -Wextra
+export CFLAGS   ?= -O0 -g -Wall -Wextra -fvisibility=hidden
 CFLAGS += -fpic
 export CPPFLAGS ?= \
 	-I$(BASE_SRC_DIR)/include/

@@ -62,10 +62,15 @@ struct ptspair {
 	int epollfd;
 };
 
+__attribute__((visibility("default")))
 int ptspair_init(struct ptspair *ptspair);
+__attribute__((visibility("default")))
 const char *ptspair_get_path(struct ptspair *ptspair, enum pts_index pts_index);
+__attribute__((visibility("default")))
 int ptspair_get_fd(struct ptspair *ptspair);
+__attribute__((visibility("default")))
 int ptspair_process_events(struct ptspair *ptspair);
+__attribute__((visibility("default")))
 void ptspair_clean(struct ptspair *ptspair);
 
 #endif /* PTSPAIR_H_ */
