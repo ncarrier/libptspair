@@ -93,38 +93,6 @@ static int unregister_pts_write(struct ptspair *ptspair, struct pts *pts)
 	return pts_epoll_ctl(ptspair, pts, EPOLL_CTL_MOD, EPOLLIN);
 }
 
-int ptspair_init(struct ptspair *ptspair)
-{
-	int ret;
-
-	if (ptspair == NULL)
-		return -EINVAL;
-
-	ptspair->epollfd = epoll_create1(EPOLL_CLOEXEC);
-	if (ptspair->epollfd == -1)
-		return -errno;
-
-	ret = init_pts(ptspair->pts + PTSPAIR_FOO);
-	if (ret < 0)
-		goto err;
-	ret = init_pts(ptspair->pts + PTSPAIR_BAR);
-	if (ret < 0)
-		goto err;
-
-	ret = register_pts_read(ptspair, ptspair->pts + PTSPAIR_FOO);
-	if (ret < 0)
-		goto err;
-	ret = register_pts_read(ptspair, ptspair->pts + PTSPAIR_BAR);
-	if (ret < 0)
-		goto err;
-
-	return 0;
-err:
-	ptspair_clean(ptspair);
-
-	return ret;
-}
-
 static char *write_start(struct buffer *buf)
 {
 	if (buf->end == PTSPAIR_BUFFER_SIZE)
@@ -229,27 +197,6 @@ static int process_out_event(struct ptspair *ptspair, struct pts *pts)
 	return 0;
 }
 
-const char *ptspair_get_path(struct ptspair *ptspair, enum pts_index index)
-{
-	errno = EINVAL;
-	switch (index)
-	{
-	case PTSPAIR_FOO:
-	case PTSPAIR_BAR:
-		return ptspair->pts[index].slave_path;
-	default:
-		return NULL;
-	}
-}
-
-int ptspair_get_fd(struct ptspair *ptspair)
-{
-	if (ptspair == NULL)
-		return -EINVAL;
-
-	return ptspair->epollfd;
-}
-
 /* returns the error which occurred last */
 static int process_events(struct ptspair *ptspair, struct epoll_event *events,
 		int events_nb)
@@ -276,6 +223,59 @@ static int process_events(struct ptspair *ptspair, struct epoll_event *events,
 	}
 
 	return error;
+}
+
+int ptspair_init(struct ptspair *ptspair)
+{
+	int ret;
+
+	if (ptspair == NULL)
+		return -EINVAL;
+
+	ptspair->epollfd = epoll_create1(EPOLL_CLOEXEC);
+	if (ptspair->epollfd == -1)
+		return -errno;
+
+	ret = init_pts(ptspair->pts + PTSPAIR_FOO);
+	if (ret < 0)
+		goto err;
+	ret = init_pts(ptspair->pts + PTSPAIR_BAR);
+	if (ret < 0)
+		goto err;
+
+	ret = register_pts_read(ptspair, ptspair->pts + PTSPAIR_FOO);
+	if (ret < 0)
+		goto err;
+	ret = register_pts_read(ptspair, ptspair->pts + PTSPAIR_BAR);
+	if (ret < 0)
+		goto err;
+
+	return 0;
+err:
+	ptspair_clean(ptspair);
+
+	return ret;
+}
+
+const char *ptspair_get_path(struct ptspair *ptspair, enum pts_index index)
+{
+	errno = EINVAL;
+	switch (index)
+	{
+	case PTSPAIR_FOO:
+	case PTSPAIR_BAR:
+		return ptspair->pts[index].slave_path;
+	default:
+		return NULL;
+	}
+}
+
+int ptspair_get_fd(struct ptspair *ptspair)
+{
+	if (ptspair == NULL)
+		return -EINVAL;
+
+	return ptspair->epollfd;
 }
 
 int ptspair_process_events(struct ptspair *ptspair)
