@@ -37,6 +37,7 @@ struct buffer {
 	char buf[PTSPAIR_BUFFER_SIZE];
 	int start;
 	int end;
+	/* used to distinguish full / empty when start == end */
 	bool full;
 };
 
@@ -48,6 +49,12 @@ struct pts {
 	 */
 	struct buffer buf;
 	int master;
+	/*
+	 * if one of the pts is closed, it's master fd will keep triggering
+	 * EPOLLHUP events, having a fd opened WRONLY on the slave's end
+	 * prevent this
+	 */
+	int writer;
 };
 
 struct ptspair {

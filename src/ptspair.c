@@ -26,8 +26,14 @@ static void clean_pts(struct pts *pts)
 	if (pts == NULL)
 		return;
 
-	if (pts->master != 0)
+	if (pts->writer > 0) {
+		close(pts->writer);
+		pts->writer = -1;
+	}
+	if (pts->master > 0) {
 		close(pts->master);
+		pts->master = -1;
+	}
 	memset(pts, 0, sizeof(*pts));
 }
 
@@ -36,6 +42,7 @@ static int init_pts(struct pts *pts)
 	int ret;
 
 	memset(pts, 0, sizeof(*pts));
+	pts->writer = -1;
 	pts->master = posix_openpt(O_RDWR | O_NOCTTY);
 	if (pts->master < 0) {
 		ret = -errno;
@@ -54,6 +61,11 @@ static int init_pts(struct pts *pts)
 	ret = ptsname_r(pts->master, pts->slave_path, PTSPAIR_PATH_MAX);
 	/* a buffer which is too short sets errno to ERANGE */
 	if (ret < 0) {
+		ret = -errno;
+		goto err;
+	}
+	pts->writer = open(pts->slave_path, O_WRONLY | O_CLOEXEC);
+	if (pts->writer == -1) {
 		ret = -errno;
 		goto err;
 	}
