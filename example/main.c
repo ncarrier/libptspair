@@ -25,6 +25,7 @@ static volatile bool loop = true;
 static void sigint_handler(__attribute__((unused))int sig)
 {
 	loop = false;
+	printf("Interrupted !\n");
 }
 
 int main(void)
