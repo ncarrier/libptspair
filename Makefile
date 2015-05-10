@@ -28,6 +28,10 @@ $(bin): example/main.c $(lib)
 $(lib): $(libptspair_objects)
 	$(CC) -shared $^ -o $@ $(LDFLAGS)
 
+%.o:%.c
+	mkdir -p $(dir $@)
+	$(CC) $^ -c -o $@ $(CFLAGS) $(CPPFLAGS)
+
 check: all
 	$(BASE_SRC_DIR)/tests/libptspair-test.lua $(shell realpath $(lib)) \
 		$(BASE_SRC_DIR)/include/ptspair.h
