@@ -11,6 +11,7 @@
 #include <sys/epoll.h>
 
 #include <fcntl.h>
+#include <termios.h>
 #include <unistd.h>
 
 #include <stdlib.h>
@@ -40,6 +41,7 @@ static void clean_pts(struct pts *pts)
 static int init_pts(struct pts *pts)
 {
 	int ret;
+	struct termios tios;
 
 	memset(pts, 0, sizeof(*pts));
 	pts->writer = -1;
@@ -66,6 +68,13 @@ static int init_pts(struct pts *pts)
 	}
 	pts->writer = open(pts->slave_path, O_WRONLY | O_CLOEXEC);
 	if (pts->writer == -1) {
+		ret = -errno;
+		goto err;
+	}
+	memset(&tios, 0, sizeof(tios));
+	cfmakeraw(&tios);
+	ret = tcsetattr(pts->writer, TCSANOW, &tios);
+	if (ret < 0) {
 		ret = -errno;
 		goto err;
 	}
