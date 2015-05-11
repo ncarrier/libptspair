@@ -129,7 +129,7 @@ static int write_length(struct buffer *buf)
 	if (buf->end < buf->start)
 		return buf->start - buf->end;
 
-	return PTSPAIR_BUFFER_SIZE - buf->start;
+	return PTSPAIR_BUFFER_SIZE - buf->end;
 }
 
 static void written_update(struct buffer *buf, int added)
