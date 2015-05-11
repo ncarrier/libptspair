@@ -116,16 +116,11 @@ static int unregister_pts_write(const struct ptspair *ptspair, struct pts *pts)
 
 static char *write_start(struct buffer *buf)
 {
-	if (buf->end == PTSPAIR_BUFFER_SIZE)
-		return buf->buf;
-
 	return buf->buf + buf->end;
 }
 
 static int write_length(const struct buffer *buf)
 {
-	if (buf->end == PTSPAIR_BUFFER_SIZE)
-		return PTSPAIR_BUFFER_SIZE - buf->start;
 	if (buf->end < buf->start)
 		return buf->start - buf->end;
 
@@ -142,9 +137,6 @@ static void written_update(struct buffer *buf, int added)
 
 static char *read_start(struct buffer *buf)
 {
-	if (buf->start == PTSPAIR_BUFFER_SIZE)
-		return buf->buf;
-
 	return buf->buf + buf->start;
 }
 static int read_length(struct buffer *buf)
