@@ -86,7 +86,7 @@ err:
 	return ret;
 }
 
-static int pts_epoll_ctl(struct ptspair *ptspair, struct pts *pts, int op,
+static int pts_epoll_ctl(const struct ptspair *ptspair, struct pts *pts, int op,
 		int evts)
 {
 	struct epoll_event event = {
@@ -99,17 +99,17 @@ static int pts_epoll_ctl(struct ptspair *ptspair, struct pts *pts, int op,
 	return epoll_ctl(ptspair->epollfd, op, pts->master, &event);
 }
 
-static int register_pts_read(struct ptspair *ptspair, struct pts *pts)
+static int register_pts_read(const struct ptspair *ptspair, struct pts *pts)
 {
 	return pts_epoll_ctl(ptspair, pts, EPOLL_CTL_ADD, EPOLLIN);
 }
 
-static int register_pts_write(struct ptspair *ptspair, struct pts *pts)
+static int register_pts_write(const struct ptspair *ptspair, struct pts *pts)
 {
 	return pts_epoll_ctl(ptspair, pts, EPOLL_CTL_MOD, EPOLLIN | EPOLLOUT);
 }
 
-static int unregister_pts_write(struct ptspair *ptspair, struct pts *pts)
+static int unregister_pts_write(const struct ptspair *ptspair, struct pts *pts)
 {
 	return pts_epoll_ctl(ptspair, pts, EPOLL_CTL_MOD, EPOLLIN);
 }
@@ -122,7 +122,7 @@ static char *write_start(struct buffer *buf)
 	return buf->buf + buf->end;
 }
 
-static int write_length(struct buffer *buf)
+static int write_length(const struct buffer *buf)
 {
 	if (buf->end == PTSPAIR_BUFFER_SIZE)
 		return PTSPAIR_BUFFER_SIZE - buf->start;
@@ -165,7 +165,7 @@ static void read_update(struct buffer *buf, int consumed)
 	buf->start %= PTSPAIR_BUFFER_SIZE;
 }
 
-static struct pts *get_other_pts(struct ptspair *ptspair, struct pts *pts)
+static struct pts *get_other_pts(struct ptspair *ptspair, const struct pts *pts)
 {
 	if (pts->master == ptspair->pts[PTSPAIR_FOO].master)
 		return ptspair->pts + PTSPAIR_BAR;
@@ -173,7 +173,7 @@ static struct pts *get_other_pts(struct ptspair *ptspair, struct pts *pts)
 		return ptspair->pts + PTSPAIR_FOO;
 }
 
-static int process_in_event(struct ptspair *ptspair, struct pts *pts)
+static int process_in_event(struct ptspair *ptspair, const struct pts *pts)
 {
 	ssize_t sret;
 	char *start;
@@ -278,7 +278,8 @@ err:
 	return ret;
 }
 
-const char *ptspair_get_path(struct ptspair *ptspair, enum pts_index index)
+const char *ptspair_get_path(const struct ptspair *ptspair,
+		enum pts_index index)
 {
 	errno = EINVAL;
 	switch (index)
@@ -291,7 +292,7 @@ const char *ptspair_get_path(struct ptspair *ptspair, enum pts_index index)
 	}
 }
 
-int ptspair_get_fd(struct ptspair *ptspair)
+int ptspair_get_fd(const struct ptspair *ptspair)
 {
 	if (ptspair == NULL)
 		return -EINVAL;
