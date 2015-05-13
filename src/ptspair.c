@@ -305,6 +305,20 @@ const char *ptspair_get_path(const struct ptspair *ptspair,
 	}
 }
 
+int ptspair_get_writer_fd(const struct ptspair *ptspair,
+		enum pts_index index)
+{
+	errno = EINVAL;
+	switch (index)
+	{
+	case PTSPAIR_FOO:
+	case PTSPAIR_BAR:
+		return ptspair->pts[index].writer;
+	default:
+		return -1;
+	}
+}
+
 int ptspair_get_fd(const struct ptspair *ptspair)
 {
 	if (ptspair == NULL)

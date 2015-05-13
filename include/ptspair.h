@@ -68,6 +68,10 @@ __attribute__((visibility("default")))
 const char *ptspair_get_path(const struct ptspair *ptspair,
 		enum pts_index pts_index);
 __attribute__((visibility("default")))
+/* returns the writer fd on the given pts, must NOT be closed */
+int ptspair_get_writer_fd(const struct ptspair *ptspair,
+		enum pts_index pts_index);
+__attribute__((visibility("default")))
 int ptspair_get_fd(const struct ptspair *ptspair);
 __attribute__((visibility("default")))
 int ptspair_process_events(struct ptspair *ptspair);
