@@ -38,10 +38,23 @@ static void clean_pts(struct pts *pts)
 	memset(pts, 0, sizeof(*pts));
 }
 
-static int init_pts(struct pts *pts)
+static int configure_pts(struct pts *pts)
 {
 	int ret;
 	struct termios tios;
+
+	memset(&tios, 0, sizeof(tios));
+	cfmakeraw(&tios);
+	ret = tcsetattr(pts->writer, TCSANOW, &tios);
+	if (ret < 0)
+		return -errno;
+
+	return 0;
+}
+
+static int init_pts(struct pts *pts)
+{
+	int ret;
 
 	memset(pts, 0, sizeof(*pts));
 	pts->writer = -1;
@@ -71,15 +84,8 @@ static int init_pts(struct pts *pts)
 		ret = -errno;
 		goto err;
 	}
-	memset(&tios, 0, sizeof(tios));
-	cfmakeraw(&tios);
-	ret = tcsetattr(pts->writer, TCSANOW, &tios);
-	if (ret < 0) {
-		ret = -errno;
-		goto err;
-	}
 
-	return 0;
+	return configure_pts(pts);
 err:
 	clean_pts(pts);
 
