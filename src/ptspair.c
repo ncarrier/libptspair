@@ -232,7 +232,22 @@ static int process_events(struct ptspair *ptspair, struct epoll_event *events,
 			if (ret < 0)
 				error = ret;
 		}
-		/* TODO detect and handle errors */
+		if (e->events & EPOLLERR)
+			/*
+			 * I couldn't find clues concerning the semantics of the
+			 * EPOLLERR event for a pts. I even tried grepping the
+			 * kernel, but with no luck, I guess there is nothing
+			 * left to do but cleanup
+			 */
+			return -EIO;
+		if (e->events & EPOLLHUP)
+			/*
+			 * this should normally not happen, since it means that
+			 * no opened file descriptor remain open on the slave
+			 * and we keep one. But in case someone accidentally
+			 * closed it...
+			 */
+			return -EIO;
 	}
 
 	return error;
