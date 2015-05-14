@@ -22,7 +22,7 @@
 
 #include "../include/ptspair.h"
 
-static struct termios tios = {
+static struct termios cooked_tios = {
 		.c_iflag = TTYDEF_IFLAG,
 		.c_oflag = TTYDEF_OFLAG,
 		.c_lflag = TTYDEF_LFLAG,
@@ -48,6 +48,11 @@ static struct termios tios = {
 		},
 };
 
+__attribute__((constructor))
+static void init_ptspair(void)
+{
+	cfsetspeed(&cooked_tios, B38400);
+}
 
 static void clean_pts(struct pts *pts)
 {
@@ -69,8 +74,7 @@ static int configure_pts(struct pts *pts)
 {
 	int ret;
 
-	cfsetspeed(&tios, B38400);
-	ret = tcsetattr(pts->writer, TCSANOW, &tios);
+	ret = tcsetattr(pts->writer, TCSANOW, &cooked_tios);
 	if (ret < 0)
 		return -errno;
 
