@@ -24,9 +24,9 @@
 
 static struct termios tios = {
 		.c_iflag = TTYDEF_IFLAG,
-		.c_oflag = TTYDEF_IFLAG,
-		.c_lflag = TTYDEF_IFLAG,
-		.c_cflag = TTYDEF_IFLAG,
+		.c_oflag = TTYDEF_OFLAG,
+		.c_lflag = TTYDEF_LFLAG,
+		.c_cflag = TTYDEF_CFLAG,
 		.c_cc = {
 				[VINTR] = CINTR,
 				[VQUIT] = CQUIT,
