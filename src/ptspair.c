@@ -326,6 +326,10 @@ const char *ptspair_get_path(const struct ptspair *ptspair,
 		enum pts_index index)
 {
 	errno = EINVAL;
+
+	if (ptspair == NULL)
+		return NULL;
+
 	switch (index)
 	{
 	case PTSPAIR_FOO:
@@ -340,6 +344,10 @@ int ptspair_get_writer_fd(const struct ptspair *ptspair,
 		enum pts_index index)
 {
 	errno = EINVAL;
+
+	if (ptspair == NULL)
+		return -1;
+
 	switch (index)
 	{
 	case PTSPAIR_FOO:
@@ -352,6 +360,9 @@ int ptspair_get_writer_fd(const struct ptspair *ptspair,
 
 int ptspair_raw(struct ptspair *ptspair, enum pts_index index)
 {
+	if (ptspair == NULL)
+		return -EINVAL;
+
 	switch (index)
 	{
 	case PTSPAIR_FOO:
@@ -375,6 +386,9 @@ int ptspair_process_events(struct ptspair *ptspair)
 #define PTSPAIR_EVENTS_NB 4
 	int ret;
 	struct epoll_event events[PTSPAIR_EVENTS_NB];
+
+	if (ptspair == NULL)
+		return -EINVAL;
 
 	memset(events, 0, PTSPAIR_EVENTS_NB * sizeof(*events));
 	ret = epoll_wait(ptspair->epollfd, events, PTSPAIR_EVENTS_NB, 0);
