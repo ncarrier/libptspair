@@ -11,8 +11,8 @@
 #include <sys/epoll.h>
 
 #include <fcntl.h>
-#include <termios.h>
 #include <unistd.h>
+#include <termios.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -21,6 +21,33 @@
 #include <errno.h>
 
 #include "../include/ptspair.h"
+
+static struct termios tios = {
+		.c_iflag = TTYDEF_IFLAG,
+		.c_oflag = TTYDEF_IFLAG,
+		.c_lflag = TTYDEF_IFLAG,
+		.c_cflag = TTYDEF_IFLAG,
+		.c_cc = {
+				[VINTR] = CINTR,
+				[VQUIT] = CQUIT,
+				[VERASE] = CERASE,
+				[VKILL] = CKILL,
+				[VEOF] = CEOF,
+				[VTIME] = CTIME,
+				[VMIN] = CMIN,
+				[VSWTC] = _POSIX_VDISABLE,
+				[VSTART] = CSTART,
+				[VSTOP] = CSTOP,
+				[VSUSP] = CSUSP,
+				[VEOL] = CEOL,
+				[VREPRINT] = CREPRINT,
+				[VDISCARD] = CDISCARD,
+				[VWERASE] = VWERASE,
+				[VLNEXT] = CLNEXT,
+				[VEOL2] = CEOL,
+		},
+};
+
 
 static void clean_pts(struct pts *pts)
 {
@@ -41,10 +68,8 @@ static void clean_pts(struct pts *pts)
 static int configure_pts(struct pts *pts)
 {
 	int ret;
-	struct termios tios;
 
-	memset(&tios, 0, sizeof(tios));
-	cfmakeraw(&tios);
+	cfsetspeed(&tios, B38400);
 	ret = tcsetattr(pts->writer, TCSANOW, &tios);
 	if (ret < 0)
 		return -errno;
