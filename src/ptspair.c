@@ -47,11 +47,13 @@ static struct termios cooked_tios = {
 				[VEOL2] = CEOL,
 		},
 };
+static struct termios raw_tios;
 
 __attribute__((constructor))
 static void init_ptspair(void)
 {
 	cfsetspeed(&cooked_tios, B38400);
+	cfmakeraw(&raw_tios);
 }
 
 static void clean_pts(struct pts *pts)
@@ -70,11 +72,11 @@ static void clean_pts(struct pts *pts)
 	memset(pts, 0, sizeof(*pts));
 }
 
-static int configure_pts(struct pts *pts)
+static int configure_pts(struct pts *pts, const struct termios *tios)
 {
 	int ret;
 
-	ret = tcsetattr(pts->writer, TCSANOW, &cooked_tios);
+	ret = tcsetattr(pts->writer, TCSANOW, tios);
 	if (ret < 0)
 		return -errno;
 
@@ -114,7 +116,7 @@ static int init_pts(struct pts *pts)
 		goto err;
 	}
 
-	return configure_pts(pts);
+	return configure_pts(pts, &cooked_tios);
 err:
 	clean_pts(pts);
 
@@ -345,6 +347,18 @@ int ptspair_get_writer_fd(const struct ptspair *ptspair,
 		return ptspair->pts[index].writer;
 	default:
 		return -1;
+	}
+}
+
+int ptspair_raw(struct ptspair *ptspair, enum pts_index index)
+{
+	switch (index)
+	{
+	case PTSPAIR_FOO:
+	case PTSPAIR_BAR:
+		return configure_pts(ptspair->pts + index, &raw_tios);
+	default:
+		return -EINVAL;
 	}
 }
 
