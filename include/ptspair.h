@@ -11,6 +11,7 @@
  *
  * @date 5 mai 2015
  * @author carrier.nicolas0@gmail.com
+ * @copyright MIT license, please refer to COPYING
  */
 #ifndef PTSPAIR_H_
 #define PTSPAIR_H_

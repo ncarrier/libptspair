@@ -41,3 +41,9 @@ bar's ring buffer, then bar's master starts listening to EPOLLOUT until it's
 ring buffer is empty. And vice-versa if one swaps the roles of foo and bar.  
 Note: a writer fd is opened for each slave, otherwise, the event loop will
 trigger EPOLLHUP events as soon as one slave is closed by it's user.
+
+## Licence
+
+This library is published under the MIT licence, please see COPYING for more
+details.
+

@@ -4,6 +4,7 @@
  *
  * @date 5 mai 2015
  * @author carrier.nicolas0@gmail.com
+ * @copyright MIT license, please refer to COPYING
  */
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -176,6 +177,7 @@ static char *read_start(struct buffer *buf)
 {
 	return buf->buf + buf->start;
 }
+
 static int read_length(struct buffer *buf)
 {
 	if (buf->end < buf->start)
