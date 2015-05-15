@@ -1,6 +1,6 @@
 /**
  * @file ptspair.c
- * @brief 
+ * @brief Each read on a pts, writes on the other's ring buffer.
  *
  * @date 5 mai 2015
  * @author carrier.nicolas0@gmail.com

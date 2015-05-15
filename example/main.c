@@ -1,6 +1,8 @@
 /**
  * @file main.c
- * @brief 
+ * @brief Example program on how to use libptspair. Creates a pair of pts, print
+ * their name to stdout an handles the events of the underlying fd. Quits on
+ * SIGINT
  *
  * @date 4 mai 2015
  * @author carrier.nicolas0@gmail.com
