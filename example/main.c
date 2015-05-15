@@ -52,6 +52,8 @@ int main(void)
 	if (ret < 0)
 		error(EXIT_FAILURE, errno, "epoll_ctl");
 
+	ptspair_raw(&pair, PTSPAIR_FOO);
+	ptspair_raw(&pair, PTSPAIR_BAR);
 	printf("foo pts: %s\n", ptspair_get_path(&pair, PTSPAIR_FOO));
 	printf("bar pts: %s\n", ptspair_get_path(&pair, PTSPAIR_BAR));
 	fflush(stdout);
