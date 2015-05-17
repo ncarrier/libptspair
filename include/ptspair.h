@@ -38,6 +38,7 @@
 #endif /* PTSPAIR_PATH_MAX */
 
 #define PTSPAIR_API __attribute__((visibility("default")))
+
 enum pts_index {
 	PTSPAIR_FOO,
 	PTSPAIR_BAR,
@@ -74,7 +75,6 @@ struct ptspair {
 	struct pts pts[PTSPAIR_NB];
 	int epollfd;
 };
-
 
 PTSPAIR_API int ptspair_init(struct ptspair *ptspair);
 PTSPAIR_API const char *ptspair_get_path(const struct ptspair *ptspair,
