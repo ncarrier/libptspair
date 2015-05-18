@@ -16,6 +16,10 @@ to your needs.
 Produces *libptspair.so* in the current directory. The header file is in the
 *include/* directory.
 
+One can check everything work well, provided luajit is installed, with :
+
+        $ make -f ../Makefile BASE_SRC_DIR=.. check
+
 ## Usage
 
 Please see *example/main.c* for an example on how to use it.  
