@@ -372,6 +372,20 @@ int ptspair_raw(struct ptspair *ptspair, enum pts_index index)
 	}
 }
 
+int ptspair_cooked(struct ptspair *ptspair, enum pts_index index)
+{
+	if (ptspair == NULL)
+		return -EINVAL;
+
+	switch (index) {
+	case PTSPAIR_FOO:
+	case PTSPAIR_BAR:
+		return configure_pts(ptspair->pts + index, &cooked_tios);
+	default:
+		return -EINVAL;
+	}
+}
+
 int ptspair_get_fd(const struct ptspair *ptspair)
 {
 	if (ptspair == NULL)
