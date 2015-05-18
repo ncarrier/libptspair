@@ -332,8 +332,7 @@ const char *ptspair_get_path(const struct ptspair *ptspair,
 	if (ptspair == NULL)
 		return NULL;
 
-	switch (index)
-	{
+	switch (index) {
 	case PTSPAIR_FOO:
 	case PTSPAIR_BAR:
 		return ptspair->pts[index].slave_path;
@@ -350,8 +349,7 @@ int ptspair_get_writer_fd(const struct ptspair *ptspair,
 	if (ptspair == NULL)
 		return -1;
 
-	switch (index)
-	{
+	switch (index) {
 	case PTSPAIR_FOO:
 	case PTSPAIR_BAR:
 		return ptspair->pts[index].writer;
@@ -365,8 +363,7 @@ int ptspair_raw(struct ptspair *ptspair, enum pts_index index)
 	if (ptspair == NULL)
 		return -EINVAL;
 
-	switch (index)
-	{
+	switch (index) {
 	case PTSPAIR_FOO:
 	case PTSPAIR_BAR:
 		return configure_pts(ptspair->pts + index, &raw_tios);
