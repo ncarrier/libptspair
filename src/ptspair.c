@@ -183,7 +183,7 @@ static int read_length(struct buffer *buf)
 	if (buf->end < buf->start)
 		return PTSPAIR_BUFFER_SIZE - buf->start;
 	if (buf->end == buf->start)
-		return buf->full ? PTSPAIR_BUFFER_SIZE : 0;
+		return buf->full ? PTSPAIR_BUFFER_SIZE - buf->start : 0;
 
 	return buf->end - buf->start;
 }
