@@ -1,3 +1,4 @@
+BASE_SRC_DIR := .
 VPATH := $(BASE_SRC_DIR)
 export CC       ?= gcc
 export CFLAGS   ?= -O0 -g -Wall -Wextra -fvisibility=hidden
