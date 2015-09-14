@@ -18,7 +18,7 @@ libptspair_objects := $(libptspair_src:.c=.o)
 libptspair_clean_files := \
 	$(libptspair_objects) \
 	$(lib) \
-	main.o \
+	example/main.o \
 	$(bin)
 
 all: $(bin)
