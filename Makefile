@@ -3,7 +3,7 @@ VPATH := $(BASE_SRC_DIR)
 export CC       ?= gcc
 export CFLAGS   ?= -O0 -g -Wall -Wextra -fvisibility=hidden
 CFLAGS += -fpic
-export CPPFLAGS ?= \
+export CPPFLAGS += \
 	-I$(BASE_SRC_DIR)/include/
 export LDFLAGS  ?=
 
@@ -38,5 +38,5 @@ check: all
 		$(BASE_SRC_DIR)/include/ptspair.h
 
 clean:
-	$(Q) -rm -f $(libptspair_clean_files) &>/dev/null
+	-rm -f $(libptspair_clean_files) &>/dev/null
 	-rm -d example/ src/
