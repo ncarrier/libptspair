@@ -40,3 +40,6 @@ check: all
 clean:
 	-rm -f $(libptspair_clean_files) &>/dev/null
 	-rm -d example/ src/
+
+dist:
+	git archive HEAD --prefix=/$(shell git describe --tags)/ | bzip2 > $(shell git describe --tags).tar.bz2
