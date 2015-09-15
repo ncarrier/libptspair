@@ -1,4 +1,4 @@
-BASE_SRC_DIR := .
+BASE_SRC_DIR ?= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 VPATH := $(BASE_SRC_DIR)
 export CC       ?= gcc
 export CFLAGS   ?= -O0 -g -Wall -Wextra -fvisibility=hidden
