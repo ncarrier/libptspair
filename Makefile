@@ -39,4 +39,4 @@ check: all
 
 clean:
 	$(Q) -rm -f $(libptspair_clean_files) &>/dev/null
-	-rm -r example/ src/
+	-rm -d example/ src/
