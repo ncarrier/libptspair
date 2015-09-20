@@ -48,6 +48,9 @@ install:$(lib)
 	install --mode=644 $(BASE_SRC_DIR)/include/ptspair.h \
 		$(includedir)/ptspair
 
+uninstall:
+	rm -rf $(libdir)/$(lib) $(includedir)/ptspair
+
 clean:
 	-rm -f $(libptspair_clean_files) &>/dev/null
 	-rm -d example/ src/
@@ -55,4 +58,4 @@ clean:
 dist:
 	git archive HEAD --prefix=/$(shell git describe --tags)/ | bzip2 > $(shell git describe --tags).tar.bz2
 
-.PHONY:all check install clean dist
+.PHONY:all check install clean dist uninstall
